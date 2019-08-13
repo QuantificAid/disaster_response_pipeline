@@ -30,14 +30,10 @@ def load_data(messages_filepath, categories_filepath):
         print("No appropriate csv found at 'categories_filepath'")
         return None
         
-    assert ('id' in messages.columns, 
-            "'id'-column missing in csv at 'messages_filepath'")
-    assert ('id' in categories.columns, 
-            "'id'-column missing in csv at 'categories_filepath'")
-    assert ('message' in messages.columns, 
-            "'message'-column missing in csv at 'messages_filepath'")
-    assert ('categories' in categories.columns, 
-            "'categories'-column missing in csv at 'categories_filepath'")
+    assert 'id' in messages.columns, "'id'-column missing in csv at 'messages_filepath'"
+    assert 'id' in categories.columns, "'id'-column missing in csv at 'categories_filepath'"
+    assert 'message' in messages.columns, "'message'-column missing in csv at 'messages_filepath'"
+    assert 'categories' in categories.columns, "'categories'-column missing in csv at 'categories_filepath'"
     
     df = pd.merge(messages, categories, on='id')
     
@@ -58,17 +54,78 @@ def clean_data(df):
         clean_df as pandas-Dataframe
     '''
     
+    messages_df = df[['message']]
+    
     categories_df = df['categories'].str.split(";", expand=True)
     categories_colnames = [item[:-2] for item in categories_df.loc[0]]
     categories_df.columns = categories_colnames
     
     for column in categories_df:
-        categories_df[column] = categories_df[column].apply(lambda x: x[-1])
+        categories_df[column] = categories_df[column].apply(lambda x: x[-1]).astype(int)
     
-    messages_df = df.drop('categories', axis=1)
+    #categories = ['related', 
+    #              
+    #              # all below only 1 if related 1
+    #              
+    #              'request', # if 1 offer not 1
+    #              'offer', # if 1 request not 1
+    #              
+    #              'aid_related', 
+    #              'medical_help', # only 1 if aid_related 1 
+    #              'medical_products', # only 1 if aid_related 1  
+    #              'search_and_rescue', # only 1 if aid_related 1 
+    #              'security', 'military', # only 1 if aid_related 1 
+    #              'child_alone', # only 1 if aid_related 1, but here all zero
+    #              'water', # only 1 if aid_related 1  
+    #              'food', # only 1 if aid_related 1  
+    #              'shelter', # only 1 if aid_related 1 
+    #              'clothing', # only 1 if aid_related 1  
+    #              'money', # only 1 if aid_related 1  
+    #              'missing_people', # only 1 if aid_related 1  
+    #              'refugees', # only 1 if aid_related 1  
+    #              'death', # only 1 if aid_related 1  
+    #              'other_aid', # only 1 if aid_related 1 
+    #              
+    #              'infrastructure_related', 
+    #              
+    #              'transport', # ambigous
+    #              'buildings', # ambigous
+    #              'electricity', # ambigous
+    #              'tools', # ambigous
+    #              
+    #              'hospitals', # only 1 if infrastructure_related 1
+    #              'shops', # only 1 if infrastructure_related 1
+    #              'aid_centers', # only 1 if infrastructure_related 1
+    #              'other_infrastructure', # only 1 if infrastructure_related 1
+    #              
+    #              'weather_related', 
+    #              'floods', # only 1 if weather_related 1  
+    #              'storm', # only 1 if weather_related 1  
+    #              'fire', # only 1 if weather_related 1  
+    #              'earthquake', # only 1 if weather_related 1 
+    #              'cold', # only 1 if weather_related 1 
+    #              'other_weather', # only 1 if weather_related 1 
+    #              
+    #              'direct_report'
+    #             ]
     
-    clean_df = (pd.concat([messages_df, categories_df], axis=1)
-                .drop_duplicates())
+    #assert categories_colnames == categories, "categories do not match previous schema"
+    
+    clean_df = (
+        pd.concat([
+            messages_df, 
+            categories_df], 
+            axis=1)
+        .drop_duplicates()
+        .dropna()
+    )
+    
+    clean_df.drop(
+        clean_df[(clean_df[categories_colnames] == 2).any(axis=1) == True]
+        .index, 
+        inplace=True)
+    
+    print(clean_df.related.unique())
     
     return clean_df
 
