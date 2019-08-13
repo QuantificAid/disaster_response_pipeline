@@ -7,6 +7,7 @@ def load_data(messages_filepath, categories_filepath):
     '''
     Read csv-files at 'messages_filepath' and 'categories_filepath' and 
     return 'df' as pandas dataframe merged on 'id' in messages and categories.
+    
     csv's both must have an 'id'-column, messages at 'messages_filepath' must have a
     'message' column, categories at 'categories_filepath' must have a 'categories' column.
     
@@ -16,6 +17,7 @@ def load_data(messages_filepath, categories_filepath):
     Returns:
         df as pandas-Dataframe
     '''
+    
     try:
         messages = pd.read_csv(messages_filepath)
     except:
@@ -28,10 +30,14 @@ def load_data(messages_filepath, categories_filepath):
         print("No appropriate csv found at 'categories_filepath'")
         return None
         
-    assert 'id' in messages.columns, "'id'-column missing in csv at 'messages_filepath'"
-    assert 'id' in categories.columns, "'id'-column missing in csv at 'categories_filepath'"
-    assert 'message' in categories.columns, "'message'-column missing in csv at 'messages_filepath'"
-    assert 'categories' in categories.columns, "'categories'-column missing in csv at 'categories_filepath'"
+    assert ('id' in messages.columns, 
+            "'id'-column missing in csv at 'messages_filepath'")
+    assert ('id' in categories.columns, 
+            "'id'-column missing in csv at 'categories_filepath'")
+    assert ('message' in messages.columns, 
+            "'message'-column missing in csv at 'messages_filepath'")
+    assert ('categories' in categories.columns, 
+            "'categories'-column missing in csv at 'categories_filepath'")
     
     df = pd.merge(messages, categories, on='id')
     
@@ -39,11 +45,42 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    pass
+    '''
+    Clean pandas-Dataframe 'df' and returns 'clean_df' 
+    
+    'df' must have 'categories'-column with mapping to categories in the format
+    of 'category-x' with x in [0, 1] and category from categories each separated
+    by ';'. 'df' must also include 'message'-column. 'df' can have duplicates.
+    
+    Parameters:
+        df as pandas-Dataframe
+    Returns:
+        clean_df as pandas-Dataframe
+    '''
+    
+    categories_df = df['categories'].str.split(";", expand=True)
+    categories_colnames = [item[:-2] for item in categories_df.loc[0]]
+    categories_df.columns = categories_colnames
+    
+    for column in categories_df:
+        categories_df[column] = categories_df[column].apply(lambda x: x[-1])
+    
+    messages_df = df.drop('categories', axis=1)
+    
+    clean_df = (pd.concat([messages_df, categories_df], axis=1)
+                .drop_duplicates())
+    
+    return clean_df
 
 
 def save_data(df, database_filename):
-    pass  
+    '''
+    '''
+    
+    engine = create_engine('sqlite:///'+database_filename)
+    df.to_sql(database_filename, engine, index=False, if_exists='replace')
+    
+    return None  
 
 
 def main():
