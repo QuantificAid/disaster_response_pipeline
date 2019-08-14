@@ -125,8 +125,6 @@ def clean_data(df):
         .index, 
         inplace=True)
     
-    print(clean_df.related.unique())
-    
     return clean_df
 
 
