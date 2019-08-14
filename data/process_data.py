@@ -54,63 +54,65 @@ def clean_data(df):
         clean_df as pandas-Dataframe
     '''
     
+    # extract messages (for later creating nlp-features)
     messages_df = df[['message']]
     
+    # extract category columns being 1, 0 from categories-column
     categories_df = df['categories'].str.split(";", expand=True)
     categories_colnames = [item[:-2] for item in categories_df.loc[0]]
     categories_df.columns = categories_colnames
-    
     for column in categories_df:
         categories_df[column] = categories_df[column].apply(lambda x: x[-1]).astype(int)
     
-    #categories = ['related', 
-    #              
-    #              # all below only 1 if related 1
-    #              
-    #              'request', # if 1 offer not 1
-    #              'offer', # if 1 request not 1
-    #              
-    #              'aid_related', 
-    #              'medical_help', # only 1 if aid_related 1 
-    #              'medical_products', # only 1 if aid_related 1  
-    #              'search_and_rescue', # only 1 if aid_related 1 
-    #              'security', 'military', # only 1 if aid_related 1 
-    #              'child_alone', # only 1 if aid_related 1, but here all zero
-    #              'water', # only 1 if aid_related 1  
-    #              'food', # only 1 if aid_related 1  
-    #              'shelter', # only 1 if aid_related 1 
-    #              'clothing', # only 1 if aid_related 1  
-    #              'money', # only 1 if aid_related 1  
-    #              'missing_people', # only 1 if aid_related 1  
-    #              'refugees', # only 1 if aid_related 1  
-    #              'death', # only 1 if aid_related 1  
-    #              'other_aid', # only 1 if aid_related 1 
-    #              
-    #              'infrastructure_related', 
-    #              
-    #              'transport', # ambigous
-    #              'buildings', # ambigous
-    #              'electricity', # ambigous
-    #              'tools', # ambigous
-    #              
-    #              'hospitals', # only 1 if infrastructure_related 1
-    #              'shops', # only 1 if infrastructure_related 1
-    #              'aid_centers', # only 1 if infrastructure_related 1
-    #              'other_infrastructure', # only 1 if infrastructure_related 1
-    #              
-    #              'weather_related', 
-    #              'floods', # only 1 if weather_related 1  
-    #              'storm', # only 1 if weather_related 1  
-    #              'fire', # only 1 if weather_related 1  
-    #              'earthquake', # only 1 if weather_related 1 
-    #              'cold', # only 1 if weather_related 1 
-    #              'other_weather', # only 1 if weather_related 1 
-    #              
-    #              'direct_report'
-    #             ]
+    # assert structure of columns to be matched
+    categories = ['related', 
+                  
+                  # all below only 1 if related 1
+                  
+                  'request', # if 1 offer not 1
+                  'offer', # if 1 request not 1
+                  
+                  'aid_related', 
+                  'medical_help', # only 1 if aid_related 1 
+                  'medical_products', # only 1 if aid_related 1  
+                  'search_and_rescue', # only 1 if aid_related 1 
+                  'security', 'military', # only 1 if aid_related 1 
+                  'child_alone', # only 1 if aid_related 1, but here all zero
+                  'water', # only 1 if aid_related 1  
+                  'food', # only 1 if aid_related 1  
+                  'shelter', # only 1 if aid_related 1 
+                  'clothing', # only 1 if aid_related 1  
+                  'money', # only 1 if aid_related 1  
+                  'missing_people', # only 1 if aid_related 1  
+                  'refugees', # only 1 if aid_related 1  
+                  'death', # only 1 if aid_related 1  
+                  'other_aid', # only 1 if aid_related 1 
+                  
+                  'infrastructure_related', 
+                  
+                  'transport', # ambigous
+                  'buildings', # ambigous
+                  'electricity', # ambigous
+                  'tools', # ambigous
+                  
+                  'hospitals', # only 1 if infrastructure_related 1
+                  'shops', # only 1 if infrastructure_related 1
+                  'aid_centers', # only 1 if infrastructure_related 1
+                  'other_infrastructure', # only 1 if infrastructure_related 1
+                  
+                  'weather_related', 
+                  'floods', # only 1 if weather_related 1  
+                  'storm', # only 1 if weather_related 1  
+                  'fire', # only 1 if weather_related 1  
+                  'earthquake', # only 1 if weather_related 1 
+                  'cold', # only 1 if weather_related 1 
+                  'other_weather', # only 1 if weather_related 1 
+                  
+                  'direct_report'
+                 ]
+    assert categories_colnames == categories, "categories do not match defined schema"
     
-    #assert categories_colnames == categories, "categories do not match previous schema"
-    
+    # concat dfs and drop duplicates as well as (possible) nans
     clean_df = (
         pd.concat([
             messages_df, 
@@ -120,6 +122,7 @@ def clean_data(df):
         .dropna()
     )
     
+    # drop columns containing 2 as value (being the case for 'related')
     clean_df.drop(
         clean_df[(clean_df[categories_colnames] == 2).any(axis=1) == True]
         .index, 
@@ -130,8 +133,22 @@ def clean_data(df):
 
 def save_data(df, database_filename):
     '''
+    Save data in pandas-dataframe df as sql-database
+    with database_filename
+    
+    Parameters:
+        df: pandas dataframe
+        database_filename: path to sql-database
+        
+    Returns:
+        None
     '''
     
+    # assert input types
+    assert isinstance(df, pd.DataFrame), 'no pandas dataframe for first argument'
+    assert isinstance(database_filename, str), 'no string as second argument'
+    
+    # create/replace database
     engine = create_engine('sqlite:///'+database_filename)
     df.to_sql(database_filename, engine, index=False, if_exists='replace')
     

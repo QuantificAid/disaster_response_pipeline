@@ -1,6 +1,7 @@
 # import system-libraries
 import sys
 import re
+import pickle
 
 # import other libraries
 import pandas as pd
@@ -31,6 +32,14 @@ nltk.download('wordnet', quiet=True);
 
 def load_data(database_filepath):
     '''
+    Load data from sql-database at database_filepath
+    
+    Parameters:
+        database_filepath: string
+    Returns:
+        X: np-array of text-strings for further processing/tokenization/creating features
+        Y: np-array of (multiple) categories as target for features
+        category_names: list of headers of Y
     '''
     
     # read data from sql-db into pandas-dataframe
@@ -48,7 +57,16 @@ def load_data(database_filepath):
 
 def tokenize(text):
     '''
+    Tokenize text for creating features to train and test model
+    by removing non-alphanumeric parts, lowering, 
+    tokenizing and lemmatizing ignoring stopwords
+    
+    Parameters:
+        text: string
+    Returns:
+        None
     '''
+    
     # define stop_words and lemmatizer 
     stop_words = stopwords.words("english")
     lemmatizer = WordNetLemmatizer()
@@ -67,6 +85,19 @@ def tokenize(text):
 
 def build_model():
     '''
+    Creates a pre-defined sklearn-model using
+    - CountVectorizes (with function tokenize)
+    - TfidTransformer
+    - MultiOutputClassifier with
+        - RandomForestClassifier with
+            - 'balanced' class_weight
+            - 20 n_estimators
+            - None max_features
+    
+    Parameters:
+        None
+    Returns:
+        model: sklearn-Pipeline
     '''
     
     model = Pipeline([

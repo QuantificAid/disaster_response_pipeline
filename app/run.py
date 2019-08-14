@@ -26,11 +26,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///data/DisasterResponse.db')
+df = pd.read_sql_table('data/DisasterResponse.db', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("model/model.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -40,8 +40,8 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
+    related_counts = df.groupby('related').count()['message']
+    related_names = list(related_counts.index)
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
@@ -49,18 +49,18 @@ def index():
         {
             'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
+                    x=related_names,
+                    y=related_counts
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Distribution of Message related to Disasters',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Related (1 = True, 0 = False)"
                 }
             }
         }
