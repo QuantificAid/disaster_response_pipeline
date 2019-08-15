@@ -39,14 +39,13 @@ model = joblib.load("models/model.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     related_counts = df.groupby('related').count()['message']
     related_names = [str(item) for item in related_counts.index]
     
-    print(related_counts, related_names)
+    issues_counts = df[df.related == 1][df.columns[2:]].sum()
+    issues_names = df.columns[2:]
     
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
@@ -57,7 +56,7 @@ def index():
             ],
 
             'layout': {
-                'title': 'Distribution of Message related to Disasters',
+                'title': 'Distribution of Messages Related to Disasters',
                 'yaxis': {
                     'title': "Count"
                 },
@@ -69,18 +68,18 @@ def index():
         {
             'data': [
                 Bar(
-                    x=related_names,
-                    y=related_counts
+                    x=issues_names,
+                    y=issues_counts
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message related to Disasters',
-                'yaxis': {
-                    'title': "Count"
-                },
+                'title': 'Distribution of Issues of Disaster Related Messages',
                 'xaxis': {
-                    'title': "Related (1 = True, 0 = False)"
+                    'title': "Issue Category"
+                },
+                'yaxis': {
+                    'title': "Count, Given Message Is Disaster Related"
                 }
             }
         }
@@ -89,8 +88,6 @@ def index():
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
-    
-    print(graphJSON)
     
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
