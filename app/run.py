@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Heatmap
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -48,6 +48,10 @@ def index():
     issues_counts = df[df.related == 1][df.columns[2:]].sum()
     issues_names = df.columns[2:]
     
+    cat_cols = df.columns[1:]
+    cats = df[cat_cols]
+    interrelations = pd.concat([cats[cats[col] == 1].mean() for col in cat_cols], axis=1).fillna(0)
+    
     # create visuals
     graphs = [
         {
@@ -83,6 +87,25 @@ def index():
                 },
                 'yaxis': {
                     'title': "Count, Given Message Is Disaster Related"
+                }
+            }
+        },
+        {
+            'data': [
+                Heatmap(
+                    z=interrelations,
+                    x=cat_cols,
+                    y=cat_cols
+                )
+            ],
+            
+            'layout': {
+                'title': 'Interrelations of Categories',
+                'xaxis': {
+                    'title': "Category"
+                },
+                'yaxis': {
+                    'title': "Category (only being 1=True)"
                 }
             }
         }
