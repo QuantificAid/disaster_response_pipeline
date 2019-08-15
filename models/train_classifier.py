@@ -67,6 +67,8 @@ def tokenize(text):
         None
     '''
     
+    assert isinstance(text, str)
+    
     # define stop_words and lemmatizer 
     stop_words = stopwords.words("english")
     lemmatizer = WordNetLemmatizer()
@@ -85,7 +87,7 @@ def tokenize(text):
 
 def build_model():
     '''
-    Creates a pre-defined sklearn-model using
+    Creates a pre-defined sklearn-model/pipeline using
     - CountVectorizes (with function tokenize)
     - TfidTransformer
     - MultiOutputClassifier with
@@ -113,6 +115,16 @@ def build_model():
 
 def evaluate_model(model, X_test, Y_test, category_names):
     '''
+    Evaluate and print (multioutput) sklearn-model 
+    using test features and labels (including category names for labels)
+    
+    Parameters:
+        model: (multioutput) sklearn-model
+        X_test: np-array of features
+        Y_test: np-array of (multioutput) labels
+        category_names: list of names of (multioutput) labels
+    Returns:
+        None
     '''
     
     # Predict and evaluate
@@ -130,6 +142,11 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     '''
+    Saves model as pickle file at model_filepath.
+    
+    Parameters:
+        model: anything
+        model_filepath: path as string
     '''
     
     pickle.dump(model, open(model_filepath, 'wb'))

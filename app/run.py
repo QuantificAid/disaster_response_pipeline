@@ -30,7 +30,7 @@ engine = create_engine('sqlite:///data/DisasterResponse.db')
 df = pd.read_sql_table('data/DisasterResponse.db', engine)
 
 # load model
-model = joblib.load("model/model.pkl")
+model = joblib.load("models/model.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -41,11 +41,31 @@ def index():
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
     related_counts = df.groupby('related').count()['message']
-    related_names = list(related_counts.index)
+    related_names = [str(item) for item in related_counts.index]
+    
+    print(related_counts, related_names)
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
+        {
+            'data': [
+                Bar(
+                    x=related_names,
+                    y=related_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message related to Disasters',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Related (1 = True, 0 = False)"
+                }
+            }
+        },
         {
             'data': [
                 Bar(
@@ -69,6 +89,8 @@ def index():
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+    
+    print(graphJSON)
     
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
