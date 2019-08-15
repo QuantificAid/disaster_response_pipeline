@@ -102,13 +102,17 @@ def build_model():
         model: sklearn-Pipeline
     '''
     
-    model = Pipeline([
+    base_model = Pipeline([
         ('vectr', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
         ('rfclf', MultiOutputClassifier(
             RandomForestClassifier(class_weight='balanced', 
                                    n_estimators=20, 
                                    max_features=None)))])
+    
+    parameters = {'rfclf__estimator__max_features':['auto', None]}
+    
+    model = GridSearchCV(base_model, parameters, scoring='f1_weighted', cv=2)
     
     return model
 
