@@ -1,3 +1,4 @@
+import re
 import json
 import plotly
 import pandas as pd
@@ -17,6 +18,8 @@ app = Flask(__name__)
 def tokenize(text):
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
+    
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
 
     clean_tokens = []
     for tok in tokens:
