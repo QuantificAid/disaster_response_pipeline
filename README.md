@@ -1,6 +1,6 @@
 # Disaster Response Web-App
 ## by Caspar Heidbrink
-***Disaster Response Pipeline Project in Course of Udacity's Data Scientist Nanodegree Programm***
+***Disaster Response Pipeline Project in Course of Udacity's Data Scientist Nanodegree Program***
 
 ### Motivation
 In this project an ETL ("extract-transform-load") pipeline as well as a ML ("machine learning") pipeline is being build to train a model to categorize messages from the internet, if and how they are related to disasters like floods, riots etc. The trained model is then being used to be included in a web-app which allows entering a new message and obtaining the predictions regarding disaster related categories.  
@@ -55,4 +55,4 @@ This project is part of [Udacity](www.udacity.com)'s Data Science Nanodegree Pro
 Requirements include pandas, nltk, scikit-learn and flask and are fully listed in requirements.txt and disaster_respond_pipeline.yml
 
 ### Link
-https://github.com/QuantificAid/disaster_response_pipeline (for the review that funnyly could forck the repo but could not find it later ;-)
+https://github.com/QuantificAid/disaster_response_pipeline (for the review that funnily could forck the repo but could not find it later ;-)
